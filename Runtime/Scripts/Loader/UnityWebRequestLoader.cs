@@ -8,11 +8,20 @@ namespace UnityGLTF.Loader
 	public class UnityWebRequestLoader : IDataLoader
 	{
 		private string dir;
+		private string basicAuthHeaderString;
 
 		public UnityWebRequestLoader(string dir)
 		{
 			this.dir = dir;
 		}
+
+		public void setAuthHeader(string username, string password)
+        {
+			string auth = username + ":" + password;
+			basicAuthHeaderString = System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(auth));
+			basicAuthHeaderString = "Basic " + basicAuthHeaderString;
+		}
+
 #if UNITY_WEBREQUEST
 		public async Task<Stream> LoadStreamAsync(string relativeFilePath)
 		{
@@ -20,6 +29,10 @@ namespace UnityGLTF.Loader
 			if (File.Exists(path))
 				path = "file://" + Path.GetFullPath(path);
 			var request = UnityWebRequest.Get(path);
+			if(!string.IsNullOrEmpty(basicAuthHeaderString))
+            {
+				request.SetRequestHeader("AUTHORIZATION", basicAuthHeaderString);
+            }
 			// request.downloadHandler = new DownloadStreamHandler(new byte[1024 * 1024]);
 			var asyncOperation = request.SendWebRequest();
 
