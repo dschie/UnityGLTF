@@ -29,6 +29,8 @@ namespace UnityGLTF
         public ImporterFactory Factory = null;
         public UnityAction onLoadComplete;
 
+		public string AuthHeader;
+
 #if UNITY_ANIMATION
         public IEnumerable<Animation> Animations { get; private set; }
 #endif
@@ -47,7 +49,7 @@ namespace UnityGLTF
 		public GameObject LastLoadedScene { get; private set; } = null;
 
 		[SerializeField]
-		private Shader shaderOverride = null;
+		public Shader shaderOverride = null;
 
 		[Header("Import Settings")]
 		public GLTFImporterNormals ImportNormals = GLTFImporterNormals.Import;
@@ -106,6 +108,9 @@ namespace UnityGLTF
 
                 string dir = URIHelper.GetDirectoryName(fullPath);
                 importOptions.DataLoader = new UnityWebRequestLoader(dir);
+				if(!string.IsNullOrEmpty(AuthHeader))
+					((UnityWebRequestLoader)importOptions.DataLoader).setAuthHeader(AuthHeader);
+
                 sceneImporter = Factory.CreateSceneImporter(
 	                Path.GetFileName(fullPath),
 	                importOptions
